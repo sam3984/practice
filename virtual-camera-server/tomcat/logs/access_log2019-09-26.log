@@ -1,0 +1,1 @@
+127.0.0.1 - - [26/Sep/2019:14:47:57 +0530] "GET /v1/camera/wait-for-request HTTP/1.1" 200 8
