@@ -11,7 +11,8 @@ import com.sam.virtual_camera_server.rest.beans.eventlog.IEventLogList;
 @Service
 public class RestVirtualCameraService
 {
-    //These can be used for multiple cameras
+    //These can be used for multiple cameras were key will be the Camera Id
+    //All Apis will have Id as the query parameter or path parameter
     Map<Integer, DeferredResult<IEventLogList>> logMap;
     Map<Integer, DeferredResult<String>> waitResultMap;
   
