@@ -39,12 +39,14 @@ public class CameraController
     @ApiResponse(code = 200, message = "All available camera logs fetched successfully")
     public DeferredResult<IEventLogList> getLogs() throws IOException
     {
+        System.out.println("Get Logs requested");
         DeferredResult<IEventLogList> eventLogList = new DeferredResult<IEventLogList>();
         virtualCameraService.setEventLogs(1, eventLogList);
 
         DeferredResult<String> result = virtualCameraService.getResult(1);
         if (result != null)
         {
+            System.out.println("Get Logs requested from camera");
             result.setResult("Logs");
         }
         else
@@ -67,6 +69,7 @@ public class CameraController
         eventLogList.onCompletion(new Runnable() {
             public void run()
             {
+                System.out.println("Get Logs Completed");
                 virtualCameraService.removeEventLogs(1);
             }
         });
@@ -77,13 +80,15 @@ public class CameraController
     @RequestMapping(path = "/wait-for-request", method = RequestMethod.GET, produces = {"application/json"})
     public DeferredResult<String> handleReqDefResult(HttpServletResponse response)
     {
-        DeferredResult<String> output = new DeferredResult<String>((long)80000, "reset");
+        System.out.println("wait-for-request started");
+        DeferredResult<String> output = new DeferredResult<String>((long)60000, "reset");
 
         virtualCameraService.setResult(1, output);
-
+        
         output.onCompletion(new Runnable() {
             public void run()
             {
+                System.out.println("wait-for-request completed");
                 virtualCameraService.removeResult(1);
             }
         });

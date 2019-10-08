@@ -25,7 +25,7 @@ public class VirtualCamera
 {
     public static EventRecorder eventRecoder;
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         eventRecoder = eventRecoder.getInstance();
 
@@ -33,16 +33,21 @@ public class VirtualCamera
         // connection multiple times.
         while (true)
         {
-
-            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build())
+            HttpGet httpGetRequest = null;
+            CloseableHttpClient httpClient =  HttpClientBuilder.create().build();
+            
+            try
             {
-                HttpGet httpGetRequest = new HttpGet("http://localhost:8443/v1/camera/wait-for-request");
-                RequestConfig.Builder requestConfig = RequestConfig.custom();
-                requestConfig.setSocketTimeout(60 * 1000);
-                httpGetRequest.setConfig(requestConfig.build());
+                httpGetRequest = new HttpGet("http://localhost:8443/v1/camera/wait-for-request");
+               /* RequestConfig.Builder requestConfig = RequestConfig.custom();
+                requestConfig.setConnectionRequestTimeout(10000);
+                requestConfig.setSocketTimeout(10000);
+                requestConfig.setConnectTimeout(10000);
+                httpGetRequest.setConfig(requestConfig.build());*/
 
                 // Execute HTTP request
                 HttpResponse httpResponse = httpClient.execute(httpGetRequest);
+              
 
                 System.out.println("----------------------------------------");
                 System.out.println(httpResponse.getStatusLine());
@@ -87,12 +92,17 @@ public class VirtualCamera
                             Thread t1 = new Thread(eventLogs);
                             t1.start();
                         }
+                        
                         if (response != null && response.length() != 0 && response.toString().equals("reset"))
                         {
                             System.out.println("----------------------------------------");
                             System.out.println("Request for reset recieved after 1 minute- " + response);
                             System.out.println("----------------------------------------");
-                            inputStream.close();                            
+                            //Renew httpclient
+                            inputStream.close();
+                            httpClient.close();
+                            httpClient =  HttpClientBuilder.create().build();
+                                                       
                         }
 
                     }
@@ -123,7 +133,9 @@ public class VirtualCamera
             }
             catch (SocketTimeoutException e)
             {
-                System.out.println("Resetting the connection after 1 minute");               
+                /*System.out.println("Resetting the connection after 1 minute");*/
+                httpGetRequest.abort();
+                httpClient.close();
             }
             catch (IOException e)
             {
