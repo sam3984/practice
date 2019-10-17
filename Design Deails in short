@@ -1,0 +1,27 @@
+
+Design and working of the virtual camera 
+
+1.) Virtual camera Server has support for 3 REST APIs via spring boot framework
+
+    a.) GET:/wait-for-request -- 
+	               Virtual Camera App opens http connecton and fire GET request. The request will be blocked for 1 minute until it recieves response from server.
+				   Deffered result is created and used for async call back and will be fetched and notified by GET:/logs api.
+	
+	b.) GET:/Logs -- 
+				This will notify the app by setting the deferred result created as part of GET:/wait-for-request API and 
+				create another deferred result for eventLogs which will fetch and notified by POST:/logs api.
+				
+	c.) POST:/logs -- 
+				This will be invoked by  Virtual Camera App when it is notified by GET:/logs. Then it will notify the GET:/Logs so that the final result is dispatch to user.
+				
+
+2.) Virtual Camera App :-
+
+		1.) It creates a singleton instance of eventLogList which is refreshed at 10 seconds. 
+		2.) It then creates http connection and fires GET:/wait-for-request which is blocked until some client fire GET:/logs or 1 minute is expired.
+		    Here need to figure out how to close connection at app side as of now deferred result on server timesout and send reset command to app.
+		3.) As soon as "logs" result is recieved for th #2 request it spawns another thread and fires POST:/logs which will send out the current event log list.
+		
+		So deferred result of spring is used to handle async callbacks.
+	
+ 
